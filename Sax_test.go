@@ -44,10 +44,11 @@ func getClient() (*http.Client, error) {
 
 func getSaxgoClient() (SaxoClient, error) {
 	saxo := SaxoClient{
-		Dev:          true,
-		Saxoporturl:  Saxodevporturl,
-		Saxorefurl:   Saxodevrefurl,
-		Saxotradeurl: Saxodevtradeurl,
+		Dev:            true,
+		Saxoporturl:    Saxodevporturl,
+		Saxorefurl:     Saxodevrefurl,
+		Saxotradeurl:   Saxodevtradeurl,
+		SaxoAccountKey: AccountKey,
 	}
 	client, err := getClient()
 	if err != nil {
@@ -80,7 +81,7 @@ func TestBuyStock(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, err := saxo.BuyStock(18096309, 100, AccountKey)
+	stockRes, err := saxo.BuyStock(18096309, 100)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

@@ -14,18 +14,19 @@ var Saxodevrefurl string = "https://gateway.saxobank.com/sim/openapi/ref/"
 var Saxodevtradeurl string = "https://gateway.saxobank.com/sim/openapi/trade/"
 
 type SaxoClient struct {
-	Http         *http.Client
-	Dev          bool
-	Saxoporturl  string
-	Saxorefurl   string
-	Saxotradeurl string
+	Http           *http.Client
+	Dev            bool
+	Saxoporturl    string
+	Saxorefurl     string
+	Saxotradeurl   string
+	SaxoAccountKey string
 }
 
 // https://www.developer.saxo/openapi/learn/orders-and-positions
 func (client SaxoClient) GetMyOrders() (structs.Orders, error) {
 	var orders structs.Orders
 
-	resp, err := client.Http.Get(client.Saxoporturl + "v1//orders/me?fieldGroups=DisplayAndFormat")
+	resp, err := client.Http.Get(client.Saxoporturl + "v1/orders/me?fieldGroups=DisplayAndFormat")
 	if err != nil {
 		return orders, err
 	}
@@ -41,7 +42,7 @@ func (client SaxoClient) GetMyOrders() (structs.Orders, error) {
 	return orders, err
 }
 
-func (client SaxoClient) BuyStock(uic int, amount float64, accountKey string) (structs.OrderResult, error) {
+func (client SaxoClient) BuyStock(uic int, amount float64) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	stock := structs.TradeOrder{
@@ -56,7 +57,7 @@ func (client SaxoClient) BuyStock(uic int, amount float64, accountKey string) (s
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
-		AccountKey: accountKey,
+		AccountKey: client.SaxoAccountKey,
 	}
 
 	stockJson, err := json.Marshal(stock)
