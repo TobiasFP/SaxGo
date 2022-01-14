@@ -56,7 +56,7 @@ func getSaxgoClient() (SaxoClient, error) {
 
 	saxo.Http = client
 
-	err = saxo.setAccountKey()
+	err = saxo.SetAccountKey()
 	if err != nil {
 		return saxo, err
 	}
@@ -86,7 +86,7 @@ func TestSetAccountKey(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	err = saxo.setAccountKey()
+	err = saxo.SetAccountKey()
 	if err != nil {
 		t.Errorf(err.Error())
 	}

@@ -22,7 +22,7 @@ type SaxoClient struct {
 	SaxoAccountKey string
 }
 
-func (saxo *SaxoClient) setAccountKey() error {
+func (saxo *SaxoClient) SetAccountKey() error {
 	var me structs.AccountResult
 	resp, err := saxo.Http.Get(saxo.Saxoporturl + "v1/accounts/me")
 	if err != nil {
