@@ -3,8 +3,11 @@ package saxgo
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/TobiasFP/SaxGo/structs"
 )
@@ -68,7 +71,7 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64) (structs.OrderResult, e
 		BuySell:       "Buy",
 		AssetType:     "Stock",
 		Amount:        amount,
-		AmountType:    "CashAmount",
+		AmountType:    "Quantity",
 		OrderType:     "Market",
 		OrderRelation: "StandAlone",
 		ManualOrder:   true,
@@ -99,4 +102,66 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64) (structs.OrderResult, e
 	}
 
 	return order, err
+}
+
+func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockUic int, currency string) (float64, error) {
+	price, err := saxo.getStockPrice(stockUic, currency)
+	if err != nil {
+		return 0, err
+	}
+	return cashAmount * price, nil
+}
+
+func (saxo SaxoClient) getStockPrice(stockUic int, currency string) (float64, error) {
+	var infoPrice structs.InfoPriceResult
+	resp, err := saxo.Http.Get(saxo.Saxotradeurl + "v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,InstrumentPriceDetails&AssetType=Stock&Amount=1&Uic=" + fmt.Sprint(stockUic))
+	if err != nil {
+		return 0, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	err = json.Unmarshal(body, &infoPrice)
+	if err != nil {
+		return 0, err
+	}
+
+	if !infoPrice.InstrumentPriceDetails.IsMarketOpen {
+		return 0, errors.New("market is closed")
+	}
+
+	return infoPrice.Quote.Ask, nil
+}
+
+func (saxo SaxoClient) IsMarketOpen(ExchangeId string) (bool, error) {
+	var exchangeResult structs.ExchangeResult
+	resp, err := saxo.Http.Get(saxo.Saxorefurl + "v1/exchanges/" + ExchangeId)
+	if err != nil {
+		return false, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+
+	err = json.Unmarshal(body, &exchangeResult)
+	if err != nil {
+		return false, err
+	}
+
+	if exchangeResult.AllDay {
+		return true, nil
+	}
+	now := time.Now()
+	for _, exchangeSession := range exchangeResult.ExchangeSessions {
+		if exchangeSession.State == "AutomatedTrading" && exchangeSession.StartTime.Before(now) && exchangeSession.EndTime.After(now) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

@@ -1,5 +1,7 @@
 package structs
 
+import "time"
+
 type OrderResult struct {
 	OrderId string `json:"OrderId"`
 }
@@ -18,4 +20,16 @@ type TradeOrder struct {
 		DurationType string `json:"DurationType"`
 	} `json:"OrderDuration"`
 	AccountKey string `json:"AccountKey"`
+}
+
+type InfoPriceResult struct {
+	AssetType              string                 `json:"AssetType"`
+	InstrumentPriceDetails InstrumentPriceDetails `json:"InstrumentPriceDetails"`
+	DisplayAndFormat       DisplayAndFormat       `json:"DisplayAndFormat"`
+	PriceInfo              PriceInfo              `json:"PriceInfo"`
+	PriceInfoDetails       PriceInfoDetails       `json:"PriceInfoDetails"`
+	LastUpdated            time.Time              `json:"LastUpdated"`
+	PriceSource            string                 `json:"PriceSource"`
+	Quote                  Quote                  `json:"Quote"`
+	Uic                    int                    `json:"Uic"`
 }

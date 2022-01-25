@@ -50,3 +50,39 @@ type PositionView struct {
 	TradeCostsTotal               float64 `json:"TradeCostsTotal"`
 	TradeCostsTotalInBaseCurrency float64 `json:"TradeCostsTotalInBaseCurrency"`
 }
+
+type Quote struct {
+	Amount           int     `json:"Amount"`
+	Ask              float64 `json:"Ask"`
+	Bid              float64 `json:"Bid"`
+	DelayedByMinutes int     `json:"DelayedByMinutes"`
+	ErrorCode        string  `json:"ErrorCode"`
+	MarketState      string  `json:"MarketState"`
+	Mid              float64 `json:"Mid"`
+	PriceSource      string  `json:"PriceSource"`
+	PriceSourceType  string  `json:"PriceSourceType"`
+	PriceTypeAsk     string  `json:"PriceTypeAsk"`
+	PriceTypeBid     string  `json:"PriceTypeBid"`
+}
+
+type InstrumentPriceDetails struct {
+	IsMarketOpen       bool   `json:"IsMarketOpen"`
+	ShortTradeDisabled bool   `json:"ShortTradeDisabled"`
+	ValueDate          string `json:"ValueDate"`
+}
+
+type PriceInfo struct {
+	High          float64 `json:"High"`
+	Low           float64 `json:"Low"`
+	NetChange     float64 `json:"NetChange"`
+	PercentChange float64 `json:"PercentChange"`
+}
+type PriceInfoDetails struct {
+	AskSize        float64 `json:"AskSize"`
+	BidSize        float64 `json:"BidSize"`
+	LastClose      float64 `json:"LastClose"`
+	LastTraded     float64 `json:"LastTraded"`
+	LastTradedSize float64 `json:"LastTradedSize"`
+	Open           float64 `json:"Open"`
+	Volume         float64 `json:"Volume"`
+}

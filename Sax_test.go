@@ -12,9 +12,9 @@ import (
 var (
 	clientID           = "83840fbc414641bd88ff0a779573d2dd"
 	clientSecret       = "b83e613ca4d24389b4c883ba08c8081d"
-	AccessToken        = "eyJhbGciOiJFUzI1NiIsIng1dCI6IjhGQzE5Qjc0MzFCNjNFNTVCNjc0M0QwQTc5MjMzNjZCREZGOEI4NTAifQ.eyJvYWEiOiI3Nzc3MCIsImlzcyI6Im9hIiwiYWlkIjoiMjM2NCIsInVpZCI6IkQwRm9rMUNrWUc2dXhkNlNwZ2w4NFE9PSIsImNpZCI6IkQwRm9rMUNrWUc2dXhkNlNwZ2w4NFE9PSIsImlzYSI6IkZhbHNlIiwidGlkIjoiNzM5MCIsInNpZCI6IjI5ZTJiNTg2NDJmYjQyNDM5ODFlNmVkOTgzNjIwYzQyIiwiZGdpIjoiODQiLCJleHAiOiIxNjQyMDY3NzMzIiwib2FsIjoiMUYifQ.7FD-x_R_NZ4uNFiZgQNi40t_sIf6bimGgHkbly2re5Z2WiUz_-MyCWrDvcL5t95A1UetAFYEhyOSZqbJoUOyog"
-	RefreshToken       = "1ed82007-8d69-4786-aa67-a63a23fd502b"
-	Time         int64 = 1642067733
+	AccessToken        = "eyJhbGciOiJFUzI1NiIsIng1dCI6IjhGQzE5Qjc0MzFCNjNFNTVCNjc0M0QwQTc5MjMzNjZCREZGOEI4NTAifQ.eyJvYWEiOiI3Nzc3MCIsImlzcyI6Im9hIiwiYWlkIjoiMjM2NCIsInVpZCI6IkQwRm9rMUNrWUc2dXhkNlNwZ2w4NFE9PSIsImNpZCI6IkQwRm9rMUNrWUc2dXhkNlNwZ2w4NFE9PSIsImlzYSI6IkZhbHNlIiwidGlkIjoiNzM5MCIsInNpZCI6IjU0OWE2YzljZTVjNzQxNDdhYjYyMjg1ZGYxMjEwNDBmIiwiZGdpIjoiODQiLCJleHAiOiIxNjQzMTM3NjQ4Iiwib2FsIjoiMUYifQ.J81Cvk78jhAb3TWTyNtafJEoTxf0bUeIeiu9mJsRU-mNzrKaLaFzvfEkGYxUxJhtoLk5mY9MSQbW2GszdEkAQw"
+	RefreshToken       = "cc2903a9-6969-49e4-a9df-770a2dcfd15a"
+	Time         int64 = 1643137648
 )
 
 func getClient() (*http.Client, error) {
@@ -108,6 +108,55 @@ func TestBuyStock(t *testing.T) {
 
 	if stockRes.OrderId == "" {
 		t.Errorf("got %q, wanted it to not be empty", stockRes.OrderId)
+	}
+
+}
+
+func TestConvertCashAmountToStockAmount(t *testing.T) {
+	uic := 49975 //Car xnas
+	amount := 200.00
+	expected := amount * 184.49
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	stockAmount, _ := saxo.ConvertCashAmountToStockAmount(amount, uic, "EUR")
+	if stockAmount != expected {
+		t.Errorf("got %v, expected %v", stockAmount, expected)
+	}
+}
+
+func TestGetStockPrice(t *testing.T) {
+	uic := 49975 //Car xnas
+	expected := 184.49
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	price, err := saxo.getStockPrice(uic, "EUR")
+	if err == nil {
+		if price != expected {
+			t.Errorf("got %v, expected %v", price, expected)
+		}
+	} else {
+		if err.Error() != "market is closed" {
+			t.Errorf("Expected market to be closed, but it seams open")
+		}
+	}
+}
+
+func TestIsMarketOpen(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	open, err := saxo.IsMarketOpen("NASDAQ")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	if open == true {
+		t.Errorf("Expected market to be closed, but it seams open")
 	}
 
 }
