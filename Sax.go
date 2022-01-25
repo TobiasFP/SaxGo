@@ -63,14 +63,19 @@ func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
 	return orders, err
 }
 
-func (saxo SaxoClient) BuyStock(uic int, amount float64) (structs.OrderResult, error) {
+func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (structs.OrderResult, error) {
 	var order structs.OrderResult
+
+	stockAmount, err := saxo.ConvertCashAmountToStockAmount(amount, uic, currency)
+	if err != nil {
+		return order, err
+	}
 
 	stock := structs.TradeOrder{
 		Uic:           uic,
 		BuySell:       "Buy",
 		AssetType:     "Stock",
-		Amount:        amount,
+		Amount:        stockAmount,
 		AmountType:    "Quantity",
 		OrderType:     "Market",
 		OrderRelation: "StandAlone",
@@ -109,7 +114,7 @@ func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockU
 	if err != nil {
 		return 0, err
 	}
-	return cashAmount * price, nil
+	return cashAmount / price, nil
 }
 
 func (saxo SaxoClient) getStockPrice(stockUic int, currency string) (float64, error) {
