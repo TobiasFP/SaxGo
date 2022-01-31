@@ -77,7 +77,7 @@ func (saxo SaxoClient) GetMyPositions() (structs.Positions, error) {
 	return positions, err
 }
 
-func (saxo SaxoClient) sellOrder(orderID string) (structs.OrderResult, error) {
+func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	orders, err := saxo.GetMyOrders()
