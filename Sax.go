@@ -163,6 +163,10 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (struc
 		stockAmount = convertedAmount
 	}
 
+	if stockAmount == 0 {
+		return order, errors.New("cannot buy 0 shares. you try to invest too little")
+	}
+
 	stock := structs.TradeOrder{
 		Uic:           uic,
 		BuySell:       "Buy",

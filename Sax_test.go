@@ -119,6 +119,18 @@ func TestSellOrder(t *testing.T) {
 	}
 }
 
+func TestBuyTooFewStocks(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	_, err = saxo.BuyStock(47556, 100, "USD")
+	if err == nil {
+		t.Errorf("Expected an error (cannot buy 0 shares. you try to invest too little)")
+	}
+}
+
 func TestBuyStock(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
@@ -133,7 +145,6 @@ func TestBuyStock(t *testing.T) {
 	if stockRes.OrderId == "" {
 		t.Errorf("got %q, wanted it to not be empty", stockRes.OrderId)
 	}
-
 }
 
 func TestConvertCashAmountToStockAmount(t *testing.T) {
