@@ -77,8 +77,18 @@ func (saxo SaxoClient) GetMyPositions() (structs.Positions, error) {
 	return positions, err
 }
 
-func (saxo SaxoClient) SellAllStock(uic int, orderID string) (structs.OrderResult, error) {
+func (saxo SaxoClient) sellOrder(orderID string) (structs.OrderResult, error) {
 	var order structs.OrderResult
+
+	orders, err := saxo.GetMyOrders()
+	if err != nil {
+		return order, err
+	}
+	for _, saxoOrder := range orders.Data {
+		if saxoOrder.OrderId == orderID {
+			return order, errors.New("order has not been converted into a position, so cannot sell")
+		}
+	}
 
 	positions, err := saxo.GetMyPositions()
 	if err != nil {
@@ -86,8 +96,11 @@ func (saxo SaxoClient) SellAllStock(uic int, orderID string) (structs.OrderResul
 	}
 	// This should be optimised to simply call the positions endpoint with a search instaed.
 	for _, position := range positions.Data {
-		if position.PositionBase.SourceOrderId == orderID && int(position.PositionBase.Uic) == uic {
-			order, err = saxo.SellStock(uic, position.PositionBase.Amount)
+		if position.PositionBase.SourceOrderId == orderID {
+			if position.PositionBase.Amount <= 0 {
+				return order, errors.New("position is already sold, cannot resell")
+			}
+			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount)
 			return order, err
 		}
 	}
@@ -126,6 +139,11 @@ func (saxo SaxoClient) SellStock(uic int, amount float64) (structs.OrderResult, 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return order, err
+	}
+
+	restErr, err := structs.GetRestError(body)
+	if err != nil {
+		return order, errors.New(restErr.ErrorInfo.Message)
 	}
 
 	err = json.Unmarshal(body, &order)
@@ -195,7 +213,7 @@ func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.Info
 		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
 	}
 
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,InstrumentPriceDetails&AssetType=Stock&Amount=1&Uic=" + fmt.Sprint(stockUic))
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,DisplayAndFormat,InstrumentPriceDetails&AssetType=Stock&Amount=1&Uic=" + fmt.Sprint(stockUic))
 	if err != nil {
 		return infoPrice, err
 	}

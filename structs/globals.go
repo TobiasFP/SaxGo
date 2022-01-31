@@ -1,5 +1,30 @@
 package structs
 
+import (
+	"encoding/json"
+	"errors"
+)
+
+func GetRestError(body []byte) (RestError, error) {
+	var restError RestError
+	err := json.Unmarshal(body, &restError)
+	if err != nil {
+		return restError, err
+	}
+
+	if restError.ErrorInfo.ErrorCode != "" {
+		return restError, errors.New("Error, check RestError struct for details")
+	}
+
+	return restError, nil
+}
+
+type RestError struct {
+	ErrorInfo struct {
+		ErrorCode string `json:"ErrorCode"`
+		Message   string `json:"Message"`
+	} `json:"ErrorInfo"`
+}
 type DisplayAndFormat struct {
 	Currency    string  `json:"Currency"`
 	Decimals    float64 `json:"Decimals"`

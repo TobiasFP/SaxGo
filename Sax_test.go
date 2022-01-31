@@ -101,15 +101,17 @@ func TestSetAccountKey(t *testing.T) {
 	}
 }
 
-func TestSellAllStock(t *testing.T) {
+func TestSellOrder(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
+		return
 	}
 
-	stockRes, err := saxo.SellAllStock(7167401, "5001027472")
+	stockRes, err := saxo.sellOrder("5001025814")
 	if err != nil {
 		t.Errorf(err.Error())
+		return
 	}
 
 	if stockRes.OrderId == "" {
