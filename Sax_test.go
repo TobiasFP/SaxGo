@@ -108,7 +108,7 @@ func TestSellOrder(t *testing.T) {
 		return
 	}
 
-	stockRes, err := saxo.sellOrder("5001025814")
+	stockRes, err := saxo.SellOrder("5001025814")
 	if err != nil {
 		t.Errorf(err.Error())
 		return
