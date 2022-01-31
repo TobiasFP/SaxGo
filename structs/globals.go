@@ -13,7 +13,7 @@ type PositionBase struct {
 	Amount                     float64 `json:"Amount"`
 	AssetType                  string  `json:"AssetType"`
 	CanBeClosed                bool    `json:"CanBeClosed"`
-	ClientId                   float64 `json:"ClientId"`
+	ClientId                   string  `json:"ClientId"`
 	CloseConversionRateSettled bool    `json:"CloseConversionRateSettled"`
 	ExecutionTimeOpen          string  `json:"ExecutionTimeOpen"`
 	IsForceOpen                bool    `json:"IsForceOpen"`
@@ -23,6 +23,7 @@ type PositionBase struct {
 	Status                     string  `json:"Status"`
 	Uic                        float64 `json:"Uic"`
 	ValueDate                  string  `json:"ValueDate"`
+	SourceOrderId              string  `json:"SourceOrderId"`
 }
 
 type PositionView struct {

@@ -1,11 +1,17 @@
 package structs
 
+type Positions struct {
+	Count float64    `json:"__count"`
+	Data  []Position `json:"Data"`
+}
+
 type Position struct {
 	NetPositionId    string           `json:"NetPositionId"`
 	PositionId       string           `json:"PositionId"`
 	PositionView     PositionView     `json:"PositionView"`
 	PositionBase     PositionBase     `json:"PositionBase"`
 	DisplayAndFormat DisplayAndFormat `json:"DisplayAndFormat"`
+	Exchange         exchange         `json:"Exchange"`
 }
 
 type MyBalance struct {
