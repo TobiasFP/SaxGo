@@ -217,9 +217,9 @@ func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.Info
 	if err != nil {
 		return infoPrice, err
 	}
-	if infoPrice.DisplayAndFormat.Currency != currency {
-		return infoPrice, errors.New("You ask for " + currency + " But we can only provide info for " + infoPrice.DisplayAndFormat.Currency)
-	}
+	// if infoPrice.DisplayAndFormat.Currency != currency {
+	// 	return infoPrice, errors.New("You ask for " + currency + " But we can only provide info for " + infoPrice.DisplayAndFormat.Currency)
+	// }
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return infoPrice, err
