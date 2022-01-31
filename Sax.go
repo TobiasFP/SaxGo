@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"time"
 
@@ -191,11 +192,16 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (struc
 	if err != nil {
 		return order, err
 	}
+	restErr, err := structs.GetRestError(body)
+	if err != nil {
+		return order, errors.New(restErr.ErrorInfo.Message)
+	}
 
 	err = json.Unmarshal(body, &order)
 	return order, err
 }
 
+// Rounding down to an integer is applied here.!
 func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockUic int, currency string) (float64, error) {
 	if saxo.isSim() {
 		return 0, errors.New("stock prices are unavailable in Simulation mode")
@@ -204,7 +210,7 @@ func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockU
 	if err != nil {
 		return 0, err
 	}
-	return cashAmount / price, nil
+	return math.Floor(cashAmount / price), nil
 }
 
 func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.InfoPriceResult, error) {

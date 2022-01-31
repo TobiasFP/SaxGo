@@ -125,7 +125,7 @@ func TestBuyStock(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, err := saxo.BuyStock(18096309, 100, "EUR")
+	stockRes, err := saxo.BuyStock(18096309, 100, "USD")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
