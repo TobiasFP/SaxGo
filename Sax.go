@@ -182,35 +182,44 @@ func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockU
 	if saxo.isSim() {
 		return 0, errors.New("stock prices are unavailable in Simulation mode")
 	}
-	price, err := saxo.getStockPrice(stockUic, currency)
+	price, err := saxo.getStockPriceIncludingCostToBuy(stockUic, currency)
 	if err != nil {
 		return 0, err
 	}
 	return cashAmount / price, nil
 }
 
-func (saxo SaxoClient) getStockPrice(stockUic int, currency string) (float64, error) {
+func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.InfoPriceResult, error) {
 	var infoPrice structs.InfoPriceResult
 	if saxo.isSim() {
-		return 0, errors.New("stock prices are unavailable in Simulation mode")
+		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
 	}
 
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,InstrumentPriceDetails&AssetType=Stock&Amount=1&Uic=" + fmt.Sprint(stockUic))
 	if err != nil {
-		return 0, err
+		return infoPrice, err
 	}
-
+	if infoPrice.DisplayAndFormat.Currency != currency {
+		return infoPrice, errors.New("You ask for " + currency + " But we can only provide info for " + infoPrice.DisplayAndFormat.Currency)
+	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return infoPrice, err
 	}
 
 	err = json.Unmarshal(body, &infoPrice)
 	if err != nil {
+		return infoPrice, err
+	}
+	return infoPrice, nil
+}
+
+func (saxo SaxoClient) getStockPriceIncludingCostToBuy(stockUic int, currency string) (float64, error) {
+	infoprice, err := saxo.GetInfoPrice(stockUic, currency)
+	if err != nil {
 		return 0, err
 	}
-
-	return infoPrice.Quote.Ask, nil
+	return infoprice.Quote.Mid + infoprice.Commissions.CostBuy, nil
 }
 
 func (saxo SaxoClient) Exchange(ExchangeId string) (structs.ExchangeResult, error) {

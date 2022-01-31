@@ -24,6 +24,7 @@ type TradeOrder struct {
 
 type InfoPriceResult struct {
 	AssetType              string                 `json:"AssetType"`
+	Commissions            Commissions            `json:"Commissions"`
 	InstrumentPriceDetails InstrumentPriceDetails `json:"InstrumentPriceDetails"`
 	DisplayAndFormat       DisplayAndFormat       `json:"DisplayAndFormat"`
 	PriceInfo              PriceInfo              `json:"PriceInfo"`
@@ -32,4 +33,11 @@ type InfoPriceResult struct {
 	PriceSource            string                 `json:"PriceSource"`
 	Quote                  Quote                  `json:"Quote"`
 	Uic                    int                    `json:"Uic"`
+}
+
+type Commissions struct {
+	CostBuy                 float64 `json:"CostBuy"`
+	CostIpoCashSubscription float64 `json:"CostIpoCashSubscription"`
+	CostIpoSubscription     float64 `json:"CostIpoSubscription"`
+	CostSell                float64 `json:"CostSell"`
 }
