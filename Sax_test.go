@@ -125,7 +125,7 @@ func TestBuyTooFewStocks(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, err = saxo.BuyStock(47556, 100, "USD")
+	_, _, err = saxo.BuyStock(47556, 100, "USD")
 	if err == nil {
 		t.Errorf("Expected an error (cannot buy 0 shares. you try to invest too little)")
 	}
@@ -137,7 +137,7 @@ func TestBuyStock(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, err := saxo.BuyStock(18096309, 100, "USD")
+	stockRes, _, err := saxo.BuyStock(18096309, 100, "USD")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
