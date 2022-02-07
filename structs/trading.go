@@ -15,7 +15,7 @@ type TradeOrder struct {
 	OrderPrice    float64 `json:"OrderPrice"`
 	OrderType     string  `json:"OrderType"`
 	ManualOrder   bool    `json:"ManualOrder"`
-	PositionId    int     `json:"PositionId,omitempty"`
+	PositionId    string  `json:"PositionId,omitempty"`
 	OrderDuration struct {
 		DurationType string `json:"DurationType"`
 	} `json:"OrderDuration"`

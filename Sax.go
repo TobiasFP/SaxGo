@@ -111,7 +111,7 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 
 // Sells stock.
 // PositionId is optional, if PositionId == 0, the selling of a stock will be unrelated to an order
-func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId int) (structs.OrderResult, error) {
+func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	stock := structs.TradeOrder{
@@ -128,7 +128,7 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId int) (struc
 		AccountKey: saxo.SaxoAccountKey,
 	}
 
-	if PositionId != 0 {
+	if PositionId != "" {
 		stock.PositionId = PositionId
 	}
 

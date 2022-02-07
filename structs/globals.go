@@ -13,7 +13,7 @@ func GetRestError(body []byte) (RestError, error) {
 	}
 
 	if restError.ErrorInfo.ErrorCode != "" {
-		return restError, errors.New("Error, check RestError struct for details")
+		return restError, errors.New("error, check RestError struct for details")
 	}
 
 	return restError, nil
