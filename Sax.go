@@ -101,7 +101,7 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 			if position.PositionBase.Amount <= 0 {
 				return order, errors.New("position is already sold, cannot resell")
 			}
-			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount)
+			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, position.PositionId)
 			return order, err
 		}
 	}
@@ -109,22 +109,27 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 	return order, errors.New("position or Uic not matching, cannot sell")
 }
 
-func (saxo SaxoClient) SellStock(uic int, amount float64) (structs.OrderResult, error) {
+// Sells stock.
+// PositionId is optional, if PositionId == 0, the selling of a stock will be unrelated to an order
+func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId int) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	stock := structs.TradeOrder{
-		Uic:           uic,
-		BuySell:       "Sell",
-		AssetType:     "Stock",
-		Amount:        amount,
-		AmountType:    "Quantity",
-		OrderType:     "Market",
-		OrderRelation: "StandAlone",
-		ManualOrder:   true,
+		Uic:         uic,
+		BuySell:     "Sell",
+		AssetType:   "Stock",
+		Amount:      amount,
+		AmountType:  "Quantity",
+		OrderType:   "Market",
+		ManualOrder: true,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
 		AccountKey: saxo.SaxoAccountKey,
+	}
+
+	if PositionId != 0 {
+		stock.PositionId = PositionId
 	}
 
 	stockJson, err := json.Marshal(stock)
@@ -167,14 +172,13 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (order
 	}
 
 	stock := structs.TradeOrder{
-		Uic:           uic,
-		BuySell:       "Buy",
-		AssetType:     "Stock",
-		Amount:        stockAmount,
-		AmountType:    "Quantity",
-		OrderType:     "Market",
-		OrderRelation: "StandAlone",
-		ManualOrder:   true,
+		Uic:         uic,
+		BuySell:     "Buy",
+		AssetType:   "Stock",
+		Amount:      stockAmount,
+		AmountType:  "Quantity",
+		OrderType:   "Market",
+		ManualOrder: true,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},

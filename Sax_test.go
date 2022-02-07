@@ -81,8 +81,8 @@ func TestGetMyPositions(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	if positions.Data[0].PositionId != "5001843576" {
-		t.Errorf("got %q, wanted %q", positions.Data[0].PositionId, "5001843576")
+	if positions.Data[0].PositionId != 5001843576 {
+		t.Errorf("got %q, wanted %q", positions.Data[0].PositionId, 5001843576)
 	}
 }
 
