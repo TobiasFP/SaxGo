@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/TobiasFP/SaxGo/structs"
@@ -101,7 +102,7 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 			if position.PositionBase.Amount <= 0 {
 				return order, errors.New("position is already sold, cannot resell")
 			}
-			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, position.PositionId)
+			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, strconv.Itoa(position.PositionId))
 			return order, err
 		}
 	}
