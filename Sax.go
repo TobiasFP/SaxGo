@@ -111,7 +111,8 @@ func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.Or
 
 // Sells stock.
 // PositionId is optional, if PositionId == 0, the selling of a stock will be unrelated to an order
-func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string, orderPrice float64) (structs.OrderResult, error) {
+// orderPrice is optional, if orderPrice == 0, the selling of a stock will be done at market price decided by saxo.
+func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, orderPrice float64) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	stock := structs.TradeOrder{
@@ -123,15 +124,15 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string, ord
 		OrderPrice:  orderPrice,
 		OrderType:   "Market",
 		ManualOrder: true,
-		PositionId:  PositionId,
+		PositionId:  positionId,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
 		AccountKey: saxo.SaxoAccountKey,
 	}
 
-	if PositionId != "" {
-		stock.PositionId = PositionId
+	if positionId != "" {
+		stock.PositionId = positionId
 	}
 
 	stockJson, err := json.Marshal(stock)

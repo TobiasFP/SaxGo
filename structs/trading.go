@@ -12,7 +12,7 @@ type TradeOrder struct {
 	AssetType     string  `json:"AssetType"`
 	Amount        float64 `json:"Amount"`
 	AmountType    string  `json:"AmountType"`
-	OrderPrice    float64 `json:"OrderPrice"`
+	OrderPrice    float64 `json:"OrderPrice,omitempty"`
 	OrderType     string  `json:"OrderType"`
 	ManualOrder   bool    `json:"ManualOrder"`
 	PositionId    string  `json:"PositionId,omitempty"`
