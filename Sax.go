@@ -78,7 +78,7 @@ func (saxo SaxoClient) GetMyPositions() (structs.Positions, error) {
 	return positions, err
 }
 
-func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
+func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	orders, err := saxo.GetMyOrders()
@@ -101,7 +101,7 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 			if position.PositionBase.Amount <= 0 {
 				return order, errors.New("position is already sold, cannot resell")
 			}
-			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, strconv.Itoa(position.PositionId))
+			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, strconv.Itoa(position.PositionId), orderPrice)
 			return order, err
 		}
 	}
@@ -111,7 +111,7 @@ func (saxo SaxoClient) SellOrder(orderID string) (structs.OrderResult, error) {
 
 // Sells stock.
 // PositionId is optional, if PositionId == 0, the selling of a stock will be unrelated to an order
-func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string) (structs.OrderResult, error) {
+func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string, orderPrice float64) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
 	stock := structs.TradeOrder{
@@ -120,8 +120,10 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string) (st
 		AssetType:   "Stock",
 		Amount:      amount,
 		AmountType:  "Quantity",
+		OrderPrice:  orderPrice,
 		OrderType:   "Market",
 		ManualOrder: true,
+		PositionId:  PositionId,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
