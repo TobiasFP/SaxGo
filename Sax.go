@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -157,19 +156,10 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, PositionId string) (st
 	return order, err
 }
 
-func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (order structs.OrderResult, stockAmount float64, err error) {
-	stockAmount = amount
-	if !saxo.isSim() {
-		convertedAmount, err := saxo.ConvertCashAmountToStockAmount(amount, uic, currency)
-		if err != nil {
-			return order, 0, err
-		}
-
-		stockAmount = convertedAmount
-	}
+func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64) (order structs.OrderResult, err error) {
 
 	if stockAmount == 0 {
-		return order, stockAmount, errors.New("cannot buy 0 shares. you try to invest too little")
+		return order, errors.New("cannot buy 0 shares. you try to invest too little")
 	}
 
 	stock := structs.TradeOrder{
@@ -178,8 +168,10 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (order
 		AssetType:   "Stock",
 		Amount:      stockAmount,
 		AmountType:  "Quantity",
+		OrderPrice:  orderPrice,
 		OrderType:   "Market",
 		ManualOrder: true,
+		PositionId:  "",
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
@@ -188,40 +180,28 @@ func (saxo SaxoClient) BuyStock(uic int, amount float64, currency string) (order
 
 	stockJson, err := json.Marshal(stock)
 	if err != nil {
-		return order, stockAmount, err
+		return order, err
 	}
 
 	resp, err := saxo.Http.Post(saxo.SaxoUrl+"trade/v2/orders", "application/json", bytes.NewBuffer(stockJson))
 	if err != nil {
-		return order, stockAmount, err
+		return order, err
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return order, stockAmount, err
+		return order, err
 	}
 	restErr, err := structs.GetRestError(body)
 	if err != nil {
-		return order, stockAmount, errors.New(restErr.ErrorInfo.Message)
+		return order, errors.New(restErr.ErrorInfo.Message)
 	}
 
 	err = json.Unmarshal(body, &order)
-	return order, stockAmount, err
+	return order, err
 }
 
-// Rounding down to an integer is applied here.!
-func (saxo SaxoClient) ConvertCashAmountToStockAmount(cashAmount float64, stockUic int, currency string) (float64, error) {
-	if saxo.isSim() {
-		return 0, errors.New("stock prices are unavailable in Simulation mode")
-	}
-	price, err := saxo.getStockPriceIncludingCostToBuy(stockUic, currency)
-	if err != nil {
-		return 0, err
-	}
-	return math.Floor(cashAmount / price), nil
-}
-
-func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.InfoPriceResult, error) {
+func (saxo SaxoClient) GetInfoPrice(stockUic int) (structs.InfoPriceResult, error) {
 	var infoPrice structs.InfoPriceResult
 	if saxo.isSim() {
 		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
@@ -231,9 +211,7 @@ func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.Info
 	if err != nil {
 		return infoPrice, err
 	}
-	// if infoPrice.DisplayAndFormat.Currency != currency {
-	// 	return infoPrice, errors.New("You ask for " + currency + " But we can only provide info for " + infoPrice.DisplayAndFormat.Currency)
-	// }
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return infoPrice, err
@@ -246,8 +224,8 @@ func (saxo SaxoClient) GetInfoPrice(stockUic int, currency string) (structs.Info
 	return infoPrice, nil
 }
 
-func (saxo SaxoClient) getStockPriceIncludingCostToBuy(stockUic int, currency string) (float64, error) {
-	infoprice, err := saxo.GetInfoPrice(stockUic, currency)
+func (saxo SaxoClient) GetStockPriceIncludingCostToBuy(stockUic int) (float64, error) {
+	infoprice, err := saxo.GetInfoPrice(stockUic)
 	if err != nil {
 		return 0, err
 	}

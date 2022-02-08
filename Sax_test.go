@@ -125,7 +125,7 @@ func TestBuyTooFewStocks(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	_, _, err = saxo.BuyStock(47556, 100, "USD")
+	_, err = saxo.BuyStock(47556, 100, 1)
 	if err == nil {
 		t.Errorf("Expected an error (cannot buy 0 shares. you try to invest too little)")
 	}
@@ -137,30 +137,13 @@ func TestBuyStock(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, _, err := saxo.BuyStock(18096309, 100, "USD")
+	stockRes, err := saxo.BuyStock(18096309, 1, 2000)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
 	if stockRes.OrderId == "" {
 		t.Errorf("got %q, wanted it to not be empty", stockRes.OrderId)
-	}
-}
-
-func TestConvertCashAmountToStockAmount(t *testing.T) {
-	uic := 49975 //Car xnas
-	amount := 200.00
-	expected := amount * 184.49
-	saxo, err := getSaxgoClient()
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	stockAmount, err := saxo.ConvertCashAmountToStockAmount(amount, uic, "EUR")
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	if stockAmount != expected {
-		t.Errorf("got %v, expected %v", stockAmount, expected)
 	}
 }
 
@@ -171,7 +154,7 @@ func TestGetStockPrice(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	price, err := saxo.getStockPriceIncludingCostToBuy(uic, "EUR")
+	price, err := saxo.GetStockPriceIncludingCostToBuy(uic)
 	if err == nil {
 		if price != expected {
 			t.Errorf("got %v, expected %v", price, expected)
@@ -180,16 +163,13 @@ func TestGetStockPrice(t *testing.T) {
 		if saxo.isSim() && err.Error() == "stock prices are unavailable in Simulation mode" {
 			return
 		}
-
 		t.Errorf("Expected market to be closed, but it seams open")
-
 	}
 }
 
 func TestMarketOpen(t *testing.T) {
-
+	// ToDo: Get time of day and set expectedOpen accordingly.x
 	expectedOpen := true
-
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
