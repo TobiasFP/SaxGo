@@ -7,7 +7,7 @@ type Positions struct {
 
 type Position struct {
 	NetPositionId    string           `json:"NetPositionId"`
-	PositionId       int              `json:"PositionId"`
+	PositionId       string           `json:"PositionId"`
 	PositionView     PositionView     `json:"PositionView"`
 	PositionBase     PositionBase     `json:"PositionBase"`
 	DisplayAndFormat DisplayAndFormat `json:"DisplayAndFormat"`
