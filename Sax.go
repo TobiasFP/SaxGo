@@ -100,7 +100,7 @@ func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.Or
 			if position.PositionBase.Amount <= 0 {
 				return order, errors.New("position is already sold, cannot resell")
 			}
-			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, position.PositionId, orderPrice)
+			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, "", orderPrice)
 			return order, err
 		}
 	}
@@ -149,8 +149,13 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 	}
 
 	restErr, err := structs.GetRestError(body)
-	if err == nil {
+	if err != nil {
 		return order, errors.New(restErr.ErrorInfo.Message)
+	}
+
+	validationErr, err := structs.GetValidationError(body)
+	if err != nil {
+		return order, errors.New(validationErr.Message)
 	}
 
 	err = json.Unmarshal(body, &order)
@@ -193,9 +198,15 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 	if err != nil {
 		return order, err
 	}
+
 	restErr, err := structs.GetRestError(body)
-	if err == nil {
+	if err != nil {
 		return order, errors.New(restErr.ErrorInfo.Message)
+	}
+
+	validationErr, err := structs.GetValidationError(body)
+	if err != nil {
+		return order, errors.New(validationErr.Message)
 	}
 
 	err = json.Unmarshal(body, &order)

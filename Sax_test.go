@@ -105,13 +105,11 @@ func TestSellOrder(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
-		return
 	}
 
 	stockRes, err := saxo.SellOrder("5001878515", 1)
 	if err != nil {
 		t.Errorf(err.Error())
-		return
 	}
 
 	if stockRes.OrderId == "" {

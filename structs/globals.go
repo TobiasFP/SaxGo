@@ -25,6 +25,24 @@ type RestError struct {
 		Message   string `json:"Message"`
 	} `json:"ErrorInfo"`
 }
+
+func GetValidationError(body []byte) (validationError ValidationError, err error) {
+	err = json.Unmarshal(body, &validationError)
+	if err != nil {
+		return validationError, err
+	}
+
+	if validationError.ErrorCode != "" {
+		return validationError, errors.New("error, check ValidationError struct for details")
+	}
+
+	return validationError, nil
+}
+
+type ValidationError struct {
+	Message   string `json:"Message"`
+	ErrorCode string `json:"ErrorCode"`
+}
 type DisplayAndFormat struct {
 	Currency    string  `json:"Currency"`
 	Decimals    float64 `json:"Decimals"`
