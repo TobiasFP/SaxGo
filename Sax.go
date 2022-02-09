@@ -149,7 +149,7 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 	}
 
 	restErr, err := structs.GetRestError(body)
-	if err != nil {
+	if err == nil {
 		return order, errors.New(restErr.ErrorInfo.Message)
 	}
 
@@ -194,7 +194,7 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 		return order, err
 	}
 	restErr, err := structs.GetRestError(body)
-	if err != nil {
+	if err == nil {
 		return order, errors.New(restErr.ErrorInfo.Message)
 	}
 
