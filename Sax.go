@@ -123,7 +123,6 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 		OrderPrice:  orderPrice,
 		OrderType:   "Market",
 		ManualOrder: true,
-		PositionId:  positionId,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},

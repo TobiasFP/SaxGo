@@ -81,8 +81,8 @@ func TestGetMyPositions(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	if positions.Data[0].PositionId != "5001843576" {
-		t.Errorf("got %q, wanted %q", positions.Data[0].PositionId, "5001843576")
+	if positions.Data[0].PositionId != "5002521934" {
+		t.Errorf("got %q, wanted %q", positions.Data[0].PositionId, "5002521934")
 	}
 }
 
@@ -108,7 +108,7 @@ func TestSellOrder(t *testing.T) {
 		return
 	}
 
-	stockRes, err := saxo.SellOrder("5001025814", 1)
+	stockRes, err := saxo.SellOrder("5001878515", 1)
 	if err != nil {
 		t.Errorf(err.Error())
 		return
