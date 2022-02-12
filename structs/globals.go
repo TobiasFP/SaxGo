@@ -5,6 +5,14 @@ import (
 	"errors"
 )
 
+type RestError struct {
+	ErrorInfo struct {
+		ErrorCode string `json:"ErrorCode"`
+		Message   string `json:"Message"`
+	} `json:"ErrorInfo"`
+	FullMessage string
+}
+
 func GetRestError(body []byte) (RestError, error) {
 	var restError RestError
 	err := json.Unmarshal(body, &restError)
@@ -13,17 +21,17 @@ func GetRestError(body []byte) (RestError, error) {
 	}
 
 	if restError.ErrorInfo.ErrorCode != "" {
+		restError.FullMessage = string(body)
 		return restError, errors.New("error, check RestError struct for details")
 	}
 
 	return restError, nil
 }
 
-type RestError struct {
-	ErrorInfo struct {
-		ErrorCode string `json:"ErrorCode"`
-		Message   string `json:"Message"`
-	} `json:"ErrorInfo"`
+type ValidationError struct {
+	Message     string `json:"Message"`
+	ErrorCode   string `json:"ErrorCode"`
+	FullMessage string
 }
 
 func GetValidationError(body []byte) (validationError ValidationError, err error) {
@@ -33,16 +41,13 @@ func GetValidationError(body []byte) (validationError ValidationError, err error
 	}
 
 	if validationError.ErrorCode != "" {
+		validationError.FullMessage = string(body)
 		return validationError, errors.New("error, check ValidationError struct for details")
 	}
 
 	return validationError, nil
 }
 
-type ValidationError struct {
-	Message   string `json:"Message"`
-	ErrorCode string `json:"ErrorCode"`
-}
 type DisplayAndFormat struct {
 	Currency    string  `json:"Currency"`
 	Decimals    float64 `json:"Decimals"`
