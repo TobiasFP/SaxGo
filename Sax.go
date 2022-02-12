@@ -201,12 +201,12 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 
 	restErr, err := structs.GetRestError(body)
 	if err != nil {
-		return order, errors.New(restErr.ErrorInfo.Message)
+		return order, errors.New(restErr.FullMessage)
 	}
 
 	validationErr, err := structs.GetValidationError(body)
 	if err != nil {
-		return order, errors.New(validationErr.Message)
+		return order, errors.New(validationErr.FullMessage)
 	}
 
 	err = json.Unmarshal(body, &order)
