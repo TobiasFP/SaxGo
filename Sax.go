@@ -121,7 +121,7 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 		Amount:      amount,
 		AmountType:  "Quantity",
 		OrderPrice:  orderPrice,
-		OrderType:   "Market",
+		OrderType:   "Limit",
 		ManualOrder: true,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
@@ -175,7 +175,7 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 		Amount:      stockAmount,
 		AmountType:  "Quantity",
 		OrderPrice:  orderPrice,
-		OrderType:   "Market",
+		OrderType:   "Limit",
 		ManualOrder: true,
 		PositionId:  "",
 		OrderDuration: struct {
