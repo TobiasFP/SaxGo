@@ -62,6 +62,19 @@ func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
 	return orders, err
 }
 
+func (saxo SaxoClient) CancelOrder(id string) (orders structs.Orders, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v2/orders/" + id + "/?AccountKey=" + saxo.SaxoAccountKey)
+	if err != nil {
+		return orders, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return orders, err
+	}
+	err = json.Unmarshal(body, &orders)
+	return orders, err
+}
+
 func (saxo SaxoClient) GetOrderDetails(id string) (order structs.Order, err error) {
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/orders/" + id + "/details/?ClientKey=" + saxo.SaxoAccountKey)
 	if err != nil {
