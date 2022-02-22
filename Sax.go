@@ -224,8 +224,7 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 	return order, err
 }
 
-func (saxo SaxoClient) GetInfoPrice(stockUic int) (structs.InfoPriceResult, error) {
-	var infoPrice structs.InfoPriceResult
+func (saxo SaxoClient) GetInfoPrice(stockUic int) (infoPrice structs.InfoPriceResult, err error) {
 	if saxo.isSim() {
 		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
 	}
@@ -288,6 +287,28 @@ func (saxo SaxoClient) MarketOpen(ExchangeId string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (saxo SaxoClient) GetChart(assetType string, horizon int, stockUic int, date time.Time) (chartRes structs.ChartResult, err error) {
+	if saxo.isSim() {
+		return chartRes, errors.New("charts are unavailable in Simulation mode, without a connected live account")
+	}
+
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "/chart/v1/charts/?AssetType=" + assetType + "&Horizon=" + fmt.Sprint(horizon) + "&Mode=UpTo&Time=" + date.Format(time.RFC3339) + "&Uic=" + fmt.Sprint(stockUic))
+	if err != nil {
+		return chartRes, err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return chartRes, err
+	}
+
+	err = json.Unmarshal(body, &chartRes)
+	if err != nil {
+		return chartRes, err
+	}
+	return chartRes, nil
 }
 
 func (saxo SaxoClient) isSim() bool {
