@@ -10,9 +10,9 @@ type ChartResult struct {
 type Chart struct {
 	Close    float64   `json:"Close"`
 	High     float64   `json:"High"`
-	Interest int       `json:"Interest"`
+	Interest float64   `json:"Interest"`
 	Low      float64   `json:"Low"`
 	Open     float64   `json:"Open"`
 	Time     time.Time `json:"Time"`
-	Volume   int       `json:"Volume"`
+	Volume   float64   `json:"Volume"`
 }
