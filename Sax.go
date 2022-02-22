@@ -293,8 +293,7 @@ func (saxo SaxoClient) GetChart(assetType string, horizon int, stockUic int, dat
 	if saxo.isSim() {
 		return chartRes, errors.New("charts are unavailable in Simulation mode, without a connected live account")
 	}
-
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "/chart/v1/charts/?AssetType=" + assetType + "&Horizon=" + fmt.Sprint(horizon) + "&Mode=UpTo&Time=" + date.Format(time.RFC3339) + "&Uic=" + fmt.Sprint(stockUic))
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "/chart/v1/charts/?AssetType=" + assetType + "&Horizon=" + fmt.Sprint(horizon) + "&Mode=UpTo&Time=" + date.Format("2006-01-02T15:04:05.000000Z") + "&Uic=" + fmt.Sprint(stockUic))
 	if err != nil {
 		return chartRes, err
 	}
