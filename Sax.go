@@ -62,9 +62,20 @@ func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
 	return orders, err
 }
 
-func (saxo SaxoClient) GetMyPositions() (structs.Positions, error) {
-	var positions structs.Positions
+func (saxo SaxoClient) GetOrderDetails(id string) (order structs.Order, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/orders/" + id + "/details/?ClientKey=" + saxo.SaxoAccountKey)
+	if err != nil {
+		return order, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return order, err
+	}
+	err = json.Unmarshal(body, &order)
+	return order, err
+}
 
+func (saxo SaxoClient) GetMyPositions() (positions structs.Positions, err error) {
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/positions/me?fieldGroups=DisplayAndFormat,ExchangeInfo,Greeks,PositionBase,PositionIdOnly,PositionView")
 	if err != nil {
 		return positions, err
