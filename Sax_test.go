@@ -160,7 +160,7 @@ func TestBuyCfdOnStock(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, err := saxo.BuyCfdOnStock(18096309, 1)
+	stockRes, err := saxo.BuyCfd(18096309, 1, "CfdOnStock")
 	if err != nil {
 		t.Errorf(err.Error())
 	}

@@ -63,14 +63,12 @@ func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
 }
 
 func (saxo SaxoClient) CancelOrder(id string) (orders structs.CancelOrdersRes, err error) {
-	// Create request
 	url := saxo.SaxoUrl + "trade/v2/orders/" + id + "/?AccountKey=" + saxo.SaxoAccountKey
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return
 	}
 
-	// Fetch Request
 	resp, err := saxo.Http.Do(req)
 	if err != nil {
 		return orders, err
@@ -189,7 +187,7 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 	return saxo.Trade(stockOrder)
 }
 
-func (saxo SaxoClient) BuyCfdOnStock(uic int, cfdAmount float64) (order structs.OrderResult, err error) {
+func (saxo SaxoClient) BuyCfd(uic int, cfdAmount float64, on string) (order structs.OrderResult, err error) {
 	if cfdAmount == 0 {
 		return order, errors.New("cannot buy 0 shares. you try to invest too little")
 	}
@@ -197,7 +195,7 @@ func (saxo SaxoClient) BuyCfdOnStock(uic int, cfdAmount float64) (order structs.
 	cfdOrder := structs.TradeOrder{
 		Uic:         uic,
 		BuySell:     "Buy",
-		AssetType:   "CfdOnStock",
+		AssetType:   on,
 		Amount:      cfdAmount,
 		AmountType:  "Quantity",
 		OrderType:   "Market",
@@ -208,6 +206,7 @@ func (saxo SaxoClient) BuyCfdOnStock(uic int, cfdAmount float64) (order structs.
 		}{DurationType: "DayOrder"},
 		AccountKey: saxo.SaxoAccountKey,
 	}
+
 	return saxo.Trade(cfdOrder)
 }
 
