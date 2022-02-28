@@ -62,8 +62,16 @@ func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
 	return orders, err
 }
 
-func (saxo SaxoClient) CancelOrder(id string) (orders structs.Orders, err error) {
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v2/orders/" + id + "/?AccountKey=" + saxo.SaxoAccountKey)
+func (saxo SaxoClient) CancelOrder(id string) (orders structs.CancelOrdersRes, err error) {
+	// Create request
+	url := saxo.SaxoUrl + "trade/v2/orders/" + id + "/?AccountKey=" + saxo.SaxoAccountKey
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return
+	}
+
+	// Fetch Request
+	resp, err := saxo.Http.Do(req)
 	if err != nil {
 		return orders, err
 	}

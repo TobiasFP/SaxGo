@@ -2,6 +2,10 @@ package structs
 
 import "time"
 
+type CancelOrdersRes struct {
+	Orders []OrderResult `json:"orders"`
+}
+
 type OrderResult struct {
 	OrderId string `json:"OrderId"`
 }

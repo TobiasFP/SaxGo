@@ -101,6 +101,27 @@ func TestSetAccountKey(t *testing.T) {
 	}
 }
 
+func TestCancelOrder(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	stockRes, err := saxo.CancelOrder("5002415362")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if len(stockRes.Orders) == 0 {
+		t.Errorf("Wanted it to cancel orders, but none has been cancelled.")
+		return
+	}
+
+	if stockRes.Orders[0].OrderId == "" {
+		t.Errorf("got %q, wanted it to not be empty", stockRes.Orders[0].OrderId)
+	}
+}
+
 func TestSellOrder(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
