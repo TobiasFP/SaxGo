@@ -136,8 +136,6 @@ func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.Or
 // PositionId is optional, if PositionId == 0, the selling of a stock will be unrelated to an order
 // orderPrice is optional, if orderPrice == 0, the selling of a stock will be done at market price decided by saxo.
 func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, orderPrice float64) (structs.OrderResult, error) {
-	var order structs.OrderResult
-
 	stock := structs.TradeOrder{
 		Uic:         uic,
 		BuySell:     "Sell",
@@ -157,42 +155,15 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 		stock.PositionId = positionId
 	}
 
-	stockJson, err := json.Marshal(stock)
-	if err != nil {
-		return order, err
-	}
-
-	resp, err := saxo.Http.Post(saxo.SaxoUrl+"trade/v2/orders", "application/json", bytes.NewBuffer(stockJson))
-	if err != nil {
-		return order, err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return order, err
-	}
-
-	restErr, err := structs.GetRestError(body)
-	if err != nil {
-		return order, errors.New(restErr.FullMessage)
-	}
-
-	validationErr, err := structs.GetValidationError(body)
-	if err != nil {
-		return order, errors.New(validationErr.FullMessage)
-	}
-
-	err = json.Unmarshal(body, &order)
-	return order, err
+	return saxo.Trade(stock)
 }
 
 func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64) (order structs.OrderResult, err error) {
-
 	if stockAmount == 0 {
 		return order, errors.New("cannot buy 0 shares. you try to invest too little")
 	}
 
-	stock := structs.TradeOrder{
+	stockOrder := structs.TradeOrder{
 		Uic:         uic,
 		BuySell:     "Buy",
 		AssetType:   "Stock",
@@ -207,16 +178,44 @@ func (saxo SaxoClient) BuyStock(uic int, stockAmount float64, orderPrice float64
 		}{DurationType: "DayOrder"},
 		AccountKey: saxo.SaxoAccountKey,
 	}
+	return saxo.Trade(stockOrder)
+}
 
-	stockJson, err := json.Marshal(stock)
+func (saxo SaxoClient) BuyCfdOnStock(uic int, cfdAmount float64) (order structs.OrderResult, err error) {
+	if cfdAmount == 0 {
+		return order, errors.New("cannot buy 0 shares. you try to invest too little")
+	}
+
+	cfdOrder := structs.TradeOrder{
+		Uic:         uic,
+		BuySell:     "Buy",
+		AssetType:   "CfdOnStock",
+		Amount:      cfdAmount,
+		AmountType:  "Quantity",
+		OrderType:   "Market",
+		ManualOrder: true,
+		PositionId:  "",
+		OrderDuration: struct {
+			DurationType string "json:\"DurationType\""
+		}{DurationType: "DayOrder"},
+		AccountKey: saxo.SaxoAccountKey,
+	}
+	return saxo.Trade(cfdOrder)
+}
+
+func (saxo SaxoClient) Trade(orderRequest structs.TradeOrder) (order structs.OrderResult, err error) {
+	stockJson, err := json.Marshal(orderRequest)
 	if err != nil {
 		return order, err
 	}
-
 	resp, err := saxo.Http.Post(saxo.SaxoUrl+"trade/v2/orders", "application/json", bytes.NewBuffer(stockJson))
 	if err != nil {
 		return order, err
 	}
+	return orderResToOrderStruct(resp)
+}
+
+func orderResToOrderStruct(resp *http.Response) (order structs.OrderResult, err error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

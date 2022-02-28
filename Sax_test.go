@@ -81,8 +81,8 @@ func TestGetMyPositions(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	if positions.Data[0].PositionId != "5002521934" {
-		t.Errorf("got %q, wanted %q", positions.Data[0].PositionId, "5002521934")
+	if positions.Data[0].PositionId == "" {
+		t.Errorf("got %q, wanted it to not be empty", positions.Data[0].PositionId)
 	}
 }
 
@@ -117,25 +117,29 @@ func TestSellOrder(t *testing.T) {
 	}
 }
 
-func TestBuyTooFewStocks(t *testing.T) {
-	saxo, err := getSaxgoClient()
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-
-	_, err = saxo.BuyStock(47556, 100, 1)
-	if err == nil {
-		t.Errorf("Expected an error (cannot buy 0 shares. you try to invest too little)")
-	}
-}
-
 func TestBuyStock(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 
-	stockRes, err := saxo.BuyStock(18096309, 1, 2000)
+	stockRes, err := saxo.BuyStock(18096309, 1, 7)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if stockRes.OrderId == "" {
+		t.Errorf("got %q, wanted it to not be empty", stockRes.OrderId)
+	}
+}
+
+func TestBuyCfdOnStock(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	stockRes, err := saxo.BuyCfdOnStock(18096309, 1)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -147,15 +151,15 @@ func TestBuyStock(t *testing.T) {
 
 func TestGetStockPrice(t *testing.T) {
 	uic := 49975
-	expected := 184.49
+	expectedAbove := 1.00
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	price, err := saxo.GetStockPriceIncludingCostToBuy(uic)
 	if err == nil {
-		if price != expected {
-			t.Errorf("got %v, expected %v", price, expected)
+		if price <= expectedAbove {
+			t.Errorf("got %v, expected to be above %v", price, expectedAbove)
 		}
 	} else {
 		if saxo.isSim() && err.Error() == "stock prices are unavailable in Simulation mode" {
