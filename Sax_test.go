@@ -177,7 +177,7 @@ func TestGetStockPrice(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	price, err := saxo.GetStockPriceIncludingCostToBuy(uic)
+	price, err := saxo.GetPriceIncludingCostToBuy(uic, "stock")
 	if err == nil {
 		if price <= expectedAbove {
 			t.Errorf("got %v, expected to be above %v", price, expectedAbove)

@@ -130,7 +130,12 @@ func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.Or
 			if position.PositionBase.Amount <= 0 {
 				return order, errors.New("position is already sold, cannot resell")
 			}
-			order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, "", orderPrice)
+			if position.PositionBase.AssetType != "stock" {
+				order, err = saxo.SellCfd(int(position.PositionBase.Uic), position.PositionBase.Amount, "", position.PositionBase.AssetType)
+			} else {
+				order, err = saxo.SellStock(int(position.PositionBase.Uic), position.PositionBase.Amount, "", orderPrice)
+			}
+
 			return order, err
 		}
 	}
@@ -150,6 +155,28 @@ func (saxo SaxoClient) SellStock(uic int, amount float64, positionId string, ord
 		AmountType:  "Quantity",
 		OrderPrice:  orderPrice,
 		OrderType:   "Limit",
+		ManualOrder: true,
+		OrderDuration: struct {
+			DurationType string "json:\"DurationType\""
+		}{DurationType: "DayOrder"},
+		AccountKey: saxo.SaxoAccountKey,
+	}
+
+	if positionId != "" {
+		stock.PositionId = positionId
+	}
+
+	return saxo.Trade(stock)
+}
+
+func (saxo SaxoClient) SellCfd(uic int, amount float64, positionId string, on string) (structs.OrderResult, error) {
+	stock := structs.TradeOrder{
+		Uic:         uic,
+		BuySell:     "Sell",
+		AssetType:   on,
+		Amount:      amount,
+		AmountType:  "Quantity",
+		OrderType:   "Market",
 		ManualOrder: true,
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
@@ -223,7 +250,6 @@ func (saxo SaxoClient) Trade(orderRequest structs.TradeOrder) (order structs.Ord
 }
 
 func orderResToOrderStruct(resp *http.Response) (order structs.OrderResult, err error) {
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return order, err
@@ -243,12 +269,12 @@ func orderResToOrderStruct(resp *http.Response) (order structs.OrderResult, err 
 	return order, err
 }
 
-func (saxo SaxoClient) GetInfoPrice(stockUic int) (infoPrice structs.InfoPriceResult, err error) {
+func (saxo SaxoClient) GetInfoPrice(uic int, assetype string) (infoPrice structs.InfoPriceResult, err error) {
 	if saxo.isSim() {
 		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
 	}
 
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,DisplayAndFormat,InstrumentPriceDetails&AssetType=Stock&Amount=1&Uic=" + fmt.Sprint(stockUic))
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "trade/v1/infoprices/?FieldGroups=PriceInfo,PriceInfoDetails,Commissions,DisplayAndFormat,InstrumentPriceDetails&AssetType=" + assetype + "&Amount=1&Uic=" + fmt.Sprint(uic))
 	if err != nil {
 		return infoPrice, err
 	}
@@ -265,8 +291,8 @@ func (saxo SaxoClient) GetInfoPrice(stockUic int) (infoPrice structs.InfoPriceRe
 	return infoPrice, nil
 }
 
-func (saxo SaxoClient) GetStockPriceIncludingCostToBuy(stockUic int) (float64, error) {
-	infoprice, err := saxo.GetInfoPrice(stockUic)
+func (saxo SaxoClient) GetPriceIncludingCostToBuy(uic int, assetype string) (float64, error) {
+	infoprice, err := saxo.GetInfoPrice(uic, assetype)
 	if err != nil {
 		return 0, err
 	}
@@ -308,11 +334,11 @@ func (saxo SaxoClient) MarketOpen(ExchangeId string) (bool, error) {
 	return false, nil
 }
 
-func (saxo SaxoClient) GetChart(assetType string, horizon int, stockUic int, date time.Time) (chartRes structs.ChartResult, err error) {
+func (saxo SaxoClient) GetChart(assetType string, horizon int, uic int, date time.Time) (chartRes structs.ChartResult, err error) {
 	if saxo.isSim() {
 		return chartRes, errors.New("charts are unavailable in Simulation mode, without a connected live account")
 	}
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "/chart/v1/charts/?AssetType=" + assetType + "&Horizon=" + fmt.Sprint(horizon) + "&Mode=UpTo&Time=" + date.Format("2006-01-02T15:04:05.000000Z") + "&Uic=" + fmt.Sprint(stockUic))
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "/chart/v1/charts/?AssetType=" + assetType + "&Horizon=" + fmt.Sprint(horizon) + "&Mode=UpTo&Time=" + date.Format("2006-01-02T15:04:05.000000Z") + "&Uic=" + fmt.Sprint(uic))
 	if err != nil {
 		return chartRes, err
 	}
