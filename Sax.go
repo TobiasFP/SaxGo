@@ -25,21 +25,62 @@ type SaxoClient struct {
 }
 
 func (saxo *SaxoClient) SetAccountKey() error {
-	var me structs.AccountResult
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/accounts/me")
-	if err != nil {
-		return err
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(body, &me)
+	me, err := saxo.Accounts()
 	if err != nil {
 		return err
 	}
 	saxo.SaxoAccountKey = me.Data[0].AccountKey
 	return nil
+}
+
+func (saxo SaxoClient) Accounts() (me structs.AccountResult, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/accounts/me")
+	if err != nil {
+		return me, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return me, err
+	}
+	err = json.Unmarshal(body, &me)
+	if err != nil {
+		return me, err
+	}
+	return me, err
+}
+
+func (saxo SaxoClient) Me() (user structs.User, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/users/me")
+	if err != nil {
+		return user, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		return user, err
+	}
+
+	return user, err
+}
+
+func (saxo SaxoClient) MyBalance() (MyBalance structs.MyBalance, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/users/me")
+	if err != nil {
+		return MyBalance, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return MyBalance, err
+	}
+	err = json.Unmarshal(body, &MyBalance)
+	if err != nil {
+		return MyBalance, err
+	}
+
+	return MyBalance, err
 }
 
 // https://www.developer.saxo/openapi/learn/orders-and-positions
