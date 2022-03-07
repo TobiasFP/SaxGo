@@ -83,7 +83,7 @@ func (saxo SaxoClient) Me() (user structs.User, err error) {
 }
 
 func (saxo SaxoClient) MyBalance() (MyBalance structs.MyBalance, err error) {
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/users/me")
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/balances/me")
 	if err != nil {
 		return MyBalance, err
 	}
