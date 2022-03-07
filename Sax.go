@@ -33,6 +33,22 @@ func (saxo *SaxoClient) SetAccountKey() error {
 	return nil
 }
 
+func (saxo SaxoClient) Instruments(instrumentType string, search string, market string) (instruments structs.InstrumentsResult, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "ref/v1/instruments?AssetTypes=" + instrumentType + "&KeyWords=" + search + "&ExchangeId=" + market)
+	if err != nil {
+		return instruments, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return instruments, err
+	}
+	err = json.Unmarshal(body, &instruments)
+	if err != nil {
+		return instruments, err
+	}
+	return instruments, err
+}
+
 func (saxo SaxoClient) Accounts() (me structs.AccountResult, err error) {
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/accounts/me")
 	if err != nil {

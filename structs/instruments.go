@@ -1,5 +1,8 @@
 package structs
 
+type InstrumentsResult struct {
+	Data []Instrument `json:"Data"`
+}
 type Instrument struct {
 	AssetType    string   `json:"AssetType"`
 	CurrencyCode string   `json:"CurrencyCode"`
