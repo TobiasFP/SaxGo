@@ -159,8 +159,33 @@ func TestBuyCfdOnStock(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
+	// 25592892
+	// 18
+	// CfdOnStock
+	stockRes, err := saxo.BuyCfd(14991, 1, "CfdOnStock")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
 
-	stockRes, err := saxo.BuyCfd(18096309, 1, "CfdOnStock")
+	if stockRes.OrderId == "" {
+		t.Errorf("got %q, wanted it to not be empty", stockRes.OrderId)
+	}
+}
+
+func TestBuyCfdOnStockSpartan(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	infoPrice, err := saxo.GetInfoPrice(28098, "CfdOnStock")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	orderPrice := infoPrice.Quote.Mid
+	stockAmount, _ := GetStockAmount(orderPrice, 10000)
+
+	stockRes, err := saxo.BuyCfd(28098, stockAmount, "CfdOnStock")
 	if err != nil {
 		t.Errorf(err.Error())
 	}

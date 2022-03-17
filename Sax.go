@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"time"
 
@@ -284,7 +285,6 @@ func (saxo SaxoClient) BuyCfd(uic int, cfdAmount float64, on string) (order stru
 		AmountType:  "Quantity",
 		OrderType:   "Market",
 		ManualOrder: true,
-		PositionId:  "",
 		OrderDuration: struct {
 			DurationType string "json:\"DurationType\""
 		}{DurationType: "DayOrder"},
@@ -410,6 +410,28 @@ func (saxo SaxoClient) GetChart(assetType string, horizon int, uic int, date tim
 		return chartRes, err
 	}
 	return chartRes, nil
+}
+
+// Get a amount of stock to buy (rounded down to an integer, as most stocks can only be
+// purchased as integers), given an orderprice and an amount in currency.
+func GetStockAmount(orderPrice float64, orderAmountInCurrency float64) (float64, float64) {
+	costBuy := CostBuy(orderAmountInCurrency, orderPrice)
+	investmentWithoutCostBuy := orderAmountInCurrency - costBuy
+	return math.Floor((investmentWithoutCostBuy / orderPrice)), costBuy
+}
+
+// As of 2022-03-07
+func CostBuy(totalPrice float64, stockPrice float64) float64 {
+	costBuy := 0.00
+	if stockPrice > 10 {
+		costBuy = 0.001 * totalPrice
+	} else {
+		costBuy = 0.02 * totalPrice / stockPrice
+	}
+	if costBuy < 3 {
+		return 3
+	}
+	return costBuy
 }
 
 func (saxo SaxoClient) isSim() bool {
