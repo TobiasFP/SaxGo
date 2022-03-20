@@ -117,7 +117,25 @@ func (saxo SaxoClient) MyOrder(uic int) (structs.Order, error) {
 	return order, errors.New("Order with uic " + strconv.Itoa(uic) + " not found")
 }
 
-// https://www.developer.saxo/openapi/learn/orders-and-positions
+func (saxo SaxoClient) CancelOrders(uic int) (bool, error) {
+	canceled := false
+	orders, err := saxo.MyOrders()
+	if err != nil {
+		return canceled, err
+	}
+
+	for _, saxoOrder := range orders.Data {
+		if saxoOrder.Uic == uic {
+			_, err = saxo.CancelOrder(saxoOrder.OrderId)
+			if err != nil {
+				return canceled, err
+			}
+			canceled = true
+		}
+	}
+	return canceled, nil
+}
+
 func (saxo SaxoClient) MyOrders() (structs.Orders, error) {
 	var orders structs.Orders
 
