@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/TobiasFP/SaxGo/structs"
@@ -96,12 +97,28 @@ func (saxo SaxoClient) MyBalance() (MyBalance structs.MyBalance, err error) {
 	if err != nil {
 		return MyBalance, err
 	}
-
 	return MyBalance, err
 }
 
+func (saxo SaxoClient) MyOrder(uic int) (structs.Order, error) {
+	var order structs.Order
+
+	orders, err := saxo.MyOrders()
+	if err != nil {
+		return order, err
+	}
+
+	for _, saxoOrder := range orders.Data {
+		if saxoOrder.Uic == uic {
+			return order, nil
+		}
+	}
+
+	return order, errors.New("Order with uic " + strconv.Itoa(uic) + " not found")
+}
+
 // https://www.developer.saxo/openapi/learn/orders-and-positions
-func (saxo SaxoClient) GetMyOrders() (structs.Orders, error) {
+func (saxo SaxoClient) MyOrders() (structs.Orders, error) {
 	var orders structs.Orders
 
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/orders/me?fieldGroups=DisplayAndFormat")
@@ -139,7 +156,7 @@ func (saxo SaxoClient) CancelOrder(id string) (orders structs.CancelOrdersRes, e
 	return orders, err
 }
 
-func (saxo SaxoClient) GetOrderDetails(id string) (order structs.Order, err error) {
+func (saxo SaxoClient) OrderDetails(id string) (order structs.Order, err error) {
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/orders/" + id + "/details/?ClientKey=" + saxo.SaxoAccountKey)
 	if err != nil {
 		return order, err
@@ -152,8 +169,36 @@ func (saxo SaxoClient) GetOrderDetails(id string) (order structs.Order, err erro
 	return order, err
 }
 
-func (saxo SaxoClient) GetMyPositions() (positions structs.Positions, err error) {
+func (saxo SaxoClient) MyPositions() (positions structs.Positions, err error) {
 	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/positions/me?fieldGroups=DisplayAndFormat,ExchangeInfo,Greeks,PositionBase,PositionIdOnly,PositionView")
+	if err != nil {
+		return positions, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return positions, err
+	}
+	err = json.Unmarshal(body, &positions)
+	return positions, err
+}
+
+func (saxo SaxoClient) MyNetPosition(uic int) (structs.NetPosition, error) {
+	positions, err := saxo.MyNetPositions()
+	if err != nil {
+		return structs.NetPosition{}, err
+	}
+
+	for _, pos := range positions.Data {
+		if pos.NetPositionBase.Uic == uic {
+			return pos, nil
+		}
+	}
+
+	return structs.NetPosition{}, errors.New("Position with uic " + strconv.Itoa(uic) + " not found")
+}
+
+func (saxo SaxoClient) MyNetPositions() (positions structs.NetPositions, err error) {
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/netpositions/me/?fieldGroups=DisplayAndFormat")
 	if err != nil {
 		return positions, err
 	}
@@ -168,7 +213,7 @@ func (saxo SaxoClient) GetMyPositions() (positions structs.Positions, err error)
 func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.OrderResult, error) {
 	var order structs.OrderResult
 
-	orders, err := saxo.GetMyOrders()
+	orders, err := saxo.MyOrders()
 	if err != nil {
 		return order, err
 	}
@@ -178,7 +223,7 @@ func (saxo SaxoClient) SellOrder(orderID string, orderPrice float64) (structs.Or
 		}
 	}
 
-	positions, err := saxo.GetMyPositions()
+	positions, err := saxo.MyPositions()
 	if err != nil {
 		return order, err
 	}
@@ -326,7 +371,7 @@ func orderResToOrderStruct(resp *http.Response) (order structs.OrderResult, err 
 	return order, err
 }
 
-func (saxo SaxoClient) GetInfoPrice(uic int, assetype string) (infoPrice structs.InfoPriceResult, err error) {
+func (saxo SaxoClient) InfoPrice(uic int, assetype string) (infoPrice structs.InfoPriceResult, err error) {
 	if saxo.isSim() {
 		return infoPrice, errors.New("stock prices are unavailable in Simulation mode, without a connected live account")
 	}
@@ -348,8 +393,8 @@ func (saxo SaxoClient) GetInfoPrice(uic int, assetype string) (infoPrice structs
 	return infoPrice, nil
 }
 
-func (saxo SaxoClient) GetPriceIncludingCostToBuy(uic int, assetype string) (float64, error) {
-	infoprice, err := saxo.GetInfoPrice(uic, assetype)
+func (saxo SaxoClient) PriceIncludingCostToBuy(uic int, assetype string) (float64, error) {
+	infoprice, err := saxo.InfoPrice(uic, assetype)
 	if err != nil {
 		return 0, err
 	}
@@ -391,7 +436,7 @@ func (saxo SaxoClient) MarketOpen(ExchangeId string) (bool, error) {
 	return false, nil
 }
 
-func (saxo SaxoClient) GetChart(assetType string, horizon int, uic int, date time.Time) (chartRes structs.ChartResult, err error) {
+func (saxo SaxoClient) Chart(assetType string, horizon int, uic int, date time.Time) (chartRes structs.ChartResult, err error) {
 	if saxo.isSim() {
 		return chartRes, errors.New("charts are unavailable in Simulation mode, without a connected live account")
 	}

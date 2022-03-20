@@ -10,6 +10,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// ToDo: Write actual unittests that uses saxos mockdata.
+
 func getClient() (*http.Client, error) {
 	conf := &oauth2.Config{
 		RedirectURL:  "http://localhost/auth/callback",
@@ -62,7 +64,7 @@ func TestGetMyOrders(t *testing.T) {
 		return
 	}
 
-	orders, err := saxo.GetMyOrders()
+	orders, err := saxo.MyOrders()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -70,19 +72,53 @@ func TestGetMyOrders(t *testing.T) {
 		t.Errorf("got %q, wanted %q", orders.Data[0].AccountId, "16164583")
 	}
 }
-func TestGetMyPositions(t *testing.T) {
+
+func TestMyPositions(t *testing.T) {
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
 		return
 	}
 
-	positions, err := saxo.GetMyPositions()
+	positions, err := saxo.MyPositions()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
 	if positions.Data[0].PositionId == "" {
 		t.Errorf("got %q, wanted it to not be empty", positions.Data[0].PositionId)
+	}
+}
+
+func TestMyOrder(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+		return
+	}
+
+	order, err := saxo.MyOrder(23456)
+	if err == nil {
+		t.Errorf("Expected an error")
+	}
+
+	if order.Uic == 23456 {
+		t.Errorf("got %q, wanted it to be empty", order.Uic)
+	}
+}
+func TestMyNetPositions(t *testing.T) {
+	saxo, err := getSaxgoClient()
+	if err != nil {
+		t.Errorf(err.Error())
+		return
+	}
+
+	positions, err := saxo.MyNetPositions()
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	if positions.Data[0].NetPositionID == "" {
+		t.Errorf("got %q, wanted it to not be empty", positions.Data[0].NetPositionID)
 	}
 }
 
@@ -178,7 +214,7 @@ func TestBuyCfdOnStockSpartan(t *testing.T) {
 		t.Errorf(err.Error())
 	}
 
-	infoPrice, err := saxo.GetInfoPrice(28098, "CfdOnStock")
+	infoPrice, err := saxo.InfoPrice(28098, "CfdOnStock")
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -195,14 +231,14 @@ func TestBuyCfdOnStockSpartan(t *testing.T) {
 	}
 }
 
-func TestGetStockPrice(t *testing.T) {
+func TestStockPrice(t *testing.T) {
 	uic := 49975
 	expectedAbove := 1.00
 	saxo, err := getSaxgoClient()
 	if err != nil {
 		t.Errorf(err.Error())
 	}
-	price, err := saxo.GetPriceIncludingCostToBuy(uic, "stock")
+	price, err := saxo.PriceIncludingCostToBuy(uic, "stock")
 	if err == nil {
 		if price <= expectedAbove {
 			t.Errorf("got %v, expected to be above %v", price, expectedAbove)

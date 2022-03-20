@@ -60,5 +60,5 @@ type Order struct {
 	RelatedOpenOrders        []string         `json:"RelatedOpenOrders"`
 	Status                   string           `json:"Status"`
 	TradingStatus            string           `json:"TradingStatus"`
-	Uic                      float64          `json:"Uic"`
+	Uic                      int              `json:"Uic"`
 }

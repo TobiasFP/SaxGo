@@ -1,5 +1,7 @@
 package structs
 
+import "time"
+
 type Positions struct {
 	Count float64    `json:"__count"`
 	Data  []Position `json:"Data"`
@@ -12,6 +14,55 @@ type Position struct {
 	PositionBase     PositionBase     `json:"PositionBase"`
 	DisplayAndFormat DisplayAndFormat `json:"DisplayAndFormat"`
 	Exchange         exchange         `json:"Exchange"`
+}
+
+type NetPositions struct {
+	Next string        `json:"__next"`
+	Data []NetPosition `json:"Data"`
+}
+
+type NetPosition struct {
+	NetPositionBase NetPositionBase `json:"NetPositionBase"`
+	NetPositionID   string          `json:"NetPositionId"`
+	NetPositionView NetPositionView `json:"NetPositionView"`
+}
+
+type NetPositionView struct {
+	AverageOpenPrice                float64 `json:"AverageOpenPrice"`
+	AverageOpenPriceIncludingCosts  float64 `json:"AverageOpenPriceIncludingCosts"`
+	CalculationReliability          string  `json:"CalculationReliability"`
+	CurrentPrice                    float64 `json:"CurrentPrice"`
+	CurrentPriceDelayMinutes        int     `json:"CurrentPriceDelayMinutes"`
+	CurrentPriceType                string  `json:"CurrentPriceType"`
+	Exposure                        float64 `json:"Exposure"`
+	ExposureInBaseCurrency          float64 `json:"ExposureInBaseCurrency"`
+	InstrumentPriceDayPercentChange float64 `json:"InstrumentPriceDayPercentChange"`
+	PositionCount                   int     `json:"PositionCount"`
+	PositionsNotClosedCount         int     `json:"PositionsNotClosedCount"`
+	ProfitLossOnTrade               int     `json:"ProfitLossOnTrade"`
+	Status                          string  `json:"Status"`
+	TradeCostsTotal                 float64 `json:"TradeCostsTotal"`
+	TradeCostsTotalInBaseCurrency   float64 `json:"TradeCostsTotalInBaseCurrency"`
+}
+
+type NetPositionBase struct {
+	AccountID              string    `json:"AccountId"`
+	Amount                 float64   `json:"Amount"`
+	AssetType              string    `json:"AssetType"`
+	CanBeClosed            bool      `json:"CanBeClosed"`
+	ClientID               string    `json:"ClientId"`
+	HasForceOpenPositions  bool      `json:"HasForceOpenPositions"`
+	IsMarketOpen           bool      `json:"IsMarketOpen"`
+	NonTradableReason      string    `json:"NonTradableReason"`
+	NumberOfRelatedOrders  int       `json:"NumberOfRelatedOrders"`
+	OpeningDirection       string    `json:"OpeningDirection"`
+	OpenIpoOrdersCount     int       `json:"OpenIpoOrdersCount"`
+	OpenOrdersCount        int       `json:"OpenOrdersCount"`
+	OpenTriggerOrdersCount int       `json:"OpenTriggerOrdersCount"`
+	PositionsAccount       string    `json:"PositionsAccount"`
+	SinglePositionStatus   string    `json:"SinglePositionStatus"`
+	Uic                    int       `json:"Uic"`
+	ValueDate              time.Time `json:"ValueDate"`
 }
 
 type MyBalance struct {
