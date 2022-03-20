@@ -48,6 +48,8 @@ type NetPositionView struct {
 type NetPositionBase struct {
 	AccountID              string    `json:"AccountId"`
 	Amount                 float64   `json:"Amount"`
+	AmountLong             float64   `json:"AmountLong"`
+	AmountShort            float64   `json:"AmountShort"`
 	AssetType              string    `json:"AssetType"`
 	CanBeClosed            bool      `json:"CanBeClosed"`
 	ClientID               string    `json:"ClientId"`
