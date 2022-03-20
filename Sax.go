@@ -216,7 +216,7 @@ func (saxo SaxoClient) MyNetPosition(uic int) (structs.NetPosition, error) {
 }
 
 func (saxo SaxoClient) MyNetPositions() (positions structs.NetPositions, err error) {
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/netpositions/me/?fieldGroups=DisplayAndFormat")
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/netpositions/me/")
 	if err != nil {
 		return positions, err
 	}
