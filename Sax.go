@@ -188,7 +188,7 @@ func (saxo SaxoClient) OrderDetails(id string) (order structs.Order, err error) 
 }
 
 func (saxo SaxoClient) MyPositions() (positions structs.Positions, err error) {
-	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/positions/me?fieldGroups=DisplayAndFormat,ExchangeInfo,Greeks,PositionBase,PositionIdOnly,PositionView")
+	resp, err := saxo.Http.Get(saxo.SaxoUrl + "port/v1/positions/me")
 	if err != nil {
 		return positions, err
 	}
