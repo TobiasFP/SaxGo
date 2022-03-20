@@ -39,7 +39,7 @@ type NetPositionView struct {
 	InstrumentPriceDayPercentChange float64 `json:"InstrumentPriceDayPercentChange"`
 	PositionCount                   int     `json:"PositionCount"`
 	PositionsNotClosedCount         int     `json:"PositionsNotClosedCount"`
-	ProfitLossOnTrade               int     `json:"ProfitLossOnTrade"`
+	ProfitLossOnTrade               float64 `json:"ProfitLossOnTrade"`
 	Status                          string  `json:"Status"`
 	TradeCostsTotal                 float64 `json:"TradeCostsTotal"`
 	TradeCostsTotalInBaseCurrency   float64 `json:"TradeCostsTotalInBaseCurrency"`
